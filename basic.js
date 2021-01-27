@@ -1,7 +1,7 @@
 const canvas = document.getElementById("canvas")
 const canvasContext = canvas.getContext("2d")
 
-var fps = 1000/200
+var fps = 1000/100
 var lps = 1000/100
 
 function lerp(v1, v2, w) {
@@ -19,7 +19,7 @@ function multiplication(vector, scale) {
   vector.y *= scale
 }
 
-var lastTimeLogic = Date.now()
+let lastTimeLogic = Date.now()
 setInterval(function() {
   let timePass = Date.now() - lastTimeLogic
   
@@ -37,15 +37,15 @@ setInterval(function() {
   }
 }, 10)
 
-var lastTimeDraw = Date.now()
+let lastTimeDraw = Date.now()
 setInterval(function() {
   let timePass = Date.now() - lastTimeDraw
   if (timePass < fps) {
       return
   }
+
   if(game.state == GameState.MENU) {
     menu.draw(canvasContext, canvas.width, canvas.height, timePass)
-    pause.draw(canvasContext, canvas.width, canvas.height, timePass)
   } else if(game.state == GameState.WORKS) {
     game.draw(canvasContext, canvas.width, canvas.height, timePass)
   }

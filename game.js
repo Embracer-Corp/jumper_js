@@ -4,99 +4,108 @@ const GameState = {
   PAUSED: 2
 }
 
+let needTimeToSkip = 0
 const game = {
   state: GameState.MENU,
-  player: {x: 0, y: 0, size: 50, speed: 100, collision:false},
-  map: {width:7, height:12, cellSize: 0},
-
+  player: {x: 0, y: 0, realX: 0, realY: 0},
+  map: {width:7, height:12, cellSize: 0, color: ['#20BB99', '#502090'], pattern: [
+    [0,0,0,0,0,0,0],
+    [0,1,1,0,1,1,0],
+    [1,0,0,1,0,0,1],
+    [1,0,0,0,0,0,1],
+    [0,1,0,0,0,1,0],
+    [0,0,1,0,1,0,0],
+    [0,0,0,1,0,0,0]
+  ]},
+  start() {
+    this.player.x = Math.floor(this.map.width/2); this.player.y = this.map.height
+    this.player.realX = (this.player.x + 0.5) * this.map.cellSize; this.player.realY = this.player.y * this.map.cellSize
+    this.state = GameState.WORKS
+  },
   logic(timePass) {
-    let maxSpeed = this.player.speed * timePass / 1000
-    let distance = control.axis
-    multiplication(distance, maxSpeed)
+    let maxSpeed = this.map.cellSize * timePass / 1000
     
-    if (this.player.x - this.player.radius + distance.x < 0) {
-      distance.x = this.player.radius - this.player.x
-    } else if (this.player.x + this.player.radius + distance.x > this.map.width * this.map.cellSize) {
-      distance.x = this.map.width * this.map.cellSize - this.player.radius - this.player.x
+    let dx = this.player.realX - (this.player.x + 0.5) * this.map.cellSize
+    if (Math.abs(dx) < maxSpeed) {
+      this.player.realX = (this.player.x + 0.5) * this.map.cellSize
+    } else {      
+      this.player.realX -= Math.sign(dx) * maxSpeed
     }
-    if (this.player.y - this.player.radius + distance.y < 0) {
-      distance.y = this.player.radius - this.player.y
-    } else if (this.player.y + this.player.radius + distance.y > this.map.height * this.map.cellSize) {
-      distance.y = this.map.height * this.map.cellSize - this.player.radius - this.player.y
+    let dy = this.player.realY - (this.player.y) * this.map.cellSize
+    if (Math.abs(dy) < maxSpeed) {
+      this.player.realY = (this.player.y) * this.map.cellSize
+    } else {      
+      this.player.realY -= Math.sign(dy) * maxSpeed
     }
 
-    let isCollision = false
-    // for(let c in map)
-    // {
-    //   //console.log(`R:${this.player.radius}, x:${this.player.x.toFixed(2)}, y:${this.player.y.toFixed(2)}, a:${map[c].x}, b:${map[c].y}, dy2:${this.player.radius*this.player.radius - this.player.y*this.player.y}, dx:${Math.sqrt(this.player.radius*this.player.radius - this.player.x*this.player.x)}`)
-    //   if(Math.abs(Math.sqrt(this.player.radius*this.player.radius - this.player.y*this.player.y) - map[c].y) <= 0.1 && Math.abs(Math.sqrt(this.player.radius*this.player.radius - this.player.x*this.player.x) - map[c].x) <= 0.1) {
-    //     isCollision = true
-    //   }
-    //   if(this.player.x >= map[c].x && this.player.x <= map[c].w + map[c].x &&
-    //      this.player.y >= map[c].y && this.player.y <= map[c].h + map[c].y )
-    //   {
-    //     isCollision = true
-    //   }
-    // }
-    this.player.collision = isCollision
-      
-    this.player.x += distance.x
-    this.player.y += distance.y
-      
+    if (needTimeToSkip > 0) {
+      needTimeToSkip -= timePass
+      return
+    }
+    
+    //let distance = control.axis
+    //multiplication(distance, maxSpeed)
+    if (control.keyboard.isGoLeft) {
+      this.player.x--
+      needTimeToSkip = 1000
+    } else if (control.keyboard.isGoRight) {
+      this.player.x++
+      needTimeToSkip = 1000
+    }
+    if (this.player.y < this.map.height) {
+      this.player.y++
+      needTimeToSkip = 1000
+    } else if (control.keyboard.isGoUp) {
+      this.player.y--
+      needTimeToSkip = 1000
+    }
+
   },
 
   draw(ctx, ctxWidth, ctxHeight, timePass) {
-    ctx.clearRect(0, 0, ctxWidth, ctxHeight);
-    ctx.font = "12px bold Lucida Console";
-
-    // for (let j = Math.floor((this.player.camera.y-ctxHeight/2)/this.map.cellSize); j < (this.player.camera.y+ctxHeight/2)/this.map.cellSize; j++) {    
-    //   for (let i = Math.floor((this.player.camera.x-ctxWidth/2)/this.map.cellSize); i < (this.player.camera.x+ctxWidth/2)/this.map.cellSize; i++) {
-    //     if (i < 0 || i >= this.map.width/this.map.cellSize || j < 0 || j >= this.map.height/this.map.cellSize) { continue }
-    //     ctx.fillStyle = (i+j)%2?"#707580":"#707070"
-    //     ctx.fillRect(ctxWidth/2 -this.player.camera.x + i*this.map.cellSize, ctxHeight/2 -this.player.camera.y + j*this.map.cellSize, this.map.cellSize, this.map.cellSize)
-    //   }
-    // }
-
-    // ctx.strokeStyle = this.player.collision?"#FF2000":"#000"
-    // for(let c in map)
-    // {
-    //   ctx.fillStyle = "#307540"
-    //   ctx.beginPath(); ctx.rect(ctxWidth/2 -this.player.camera.x + map[c].x, ctxHeight/2 -this.player.camera.y + map[c].y, map[c].w, map[c].h)
-    //   ctx.fill(); ctx.stroke()
-    //   ctx.fillStyle = "#000"
-    //   let text = `x: ${map[c].x.toFixed(2)}, y:${map[c].y.toFixed(2)}`
-    //   ctx.fillText(text, ctxWidth/2 -this.player.camera.x + map[c].x + 5, ctxHeight/2 -this.player.camera.y + map[c].y + 15)
-    // }
-
-    ctx.fillStyle = "#902000"
+    ctx.clearRect(0, 0, ctxWidth, ctxHeight)
+    ctx.font = "12px Lucida Console"
     
-    ctx.beginPath(); ctx.arc(this.player.x, this.player.y, this.player.radius, 0, 2 * Math.PI)
-    ctx.fill(); ctx.stroke()
-    ctx.fillStyle = "#000"
-    ctx.fillRect(this.player.x - 1, this.player.y - 1, 2, 2)
-    let text = `x: ${this.player.x.toFixed(2)}, y:${this.player.y.toFixed(2)}`
-    ctx.fillText(text, this.player.x - ctx.measureText(text).width/2, this.player.y+15)
+    for(let j = 0; j < (settings.screen.orientation == ScreenOrientation.PORTRAIT ? this.map.height : this.map.width); j++) {
+      for(let i = 0; i < (settings.screen.orientation == ScreenOrientation.PORTRAIT? this.map.width : this.map.height); i++) {
+        if (j < 7) {
+          ctx.fillStyle = this.map.color[this.map.pattern[j][i]] + ((i+j)%2?'35':'40')
+        } else {
+          ctx.fillStyle = (i+j)%2?"#656565":"#707070"
+        }
+        ctx.fillRect(settings.screen.offset.x + i*this.map.cellSize, settings.screen.offset.y + j*this.map.cellSize, this.map.cellSize, this.map.cellSize)
+      }
+    }
 
+    ctx.fillStyle = "#F0602030"
+    ctx.fillRect(settings.screen.offset.x + this.player.x * this.map.cellSize, settings.screen.offset.y + (this.player.y - 1) * this.map.cellSize, this.map.cellSize, this.map.cellSize)
+    ctx.fillStyle = "#902000"
+    ctx.fillRect(settings.screen.offset.x + this.player.realX - this.map.cellSize/2, settings.screen.offset.y + this.player.realY - this.map.cellSize, this.map.cellSize, this.map.cellSize)
+    
     if (control.mouse.hold != null) {
-      ctx.fillStyle = "#00000030";
-      ctx.beginPath();ctx.arc(control.mouse.hold.x, control.mouse.hold.y, control.stickAreaRadius, 0, 2 * Math.PI);
+      ctx.fillStyle = "#00000030"
+      ctx.beginPath();ctx.arc(control.mouse.hold.x, control.mouse.hold.y, control.stickAreaRadius, 0, 2 * Math.PI)
       ctx.fill(); ctx.stroke()
-      ctx.beginPath();ctx.arc(control.mouse.hold.x, control.mouse.hold.y, control.stickSizeRadius, 0, 2 * Math.PI);
+      ctx.beginPath();ctx.arc(control.mouse.hold.x, control.mouse.hold.y, control.stickSizeRadius, 0, 2 * Math.PI)
       ctx.fill()
-      ctx.fillStyle = "#333333";
-      ctx.beginPath();ctx.arc(control.mouse.x, control.mouse.y, control.stickSizeRadius, 0, 2 * Math.PI);
+      ctx.fillStyle = "#333333"
+      ctx.beginPath();ctx.arc(control.mouse.x, control.mouse.y, control.stickSizeRadius, 0, 2 * Math.PI)
       ctx.fill(); ctx.stroke()
     }
     if (control.touch0.hold != null) {
-      ctx.fillStyle = "#00000030";
-      ctx.beginPath();ctx.arc(control.touch0.hold.x, control.touch0.hold.y, control.stickAreaRadius, 0, 2 * Math.PI);
+      ctx.fillStyle = "#00000030"
+      ctx.beginPath();ctx.arc(control.touch0.hold.x, control.touch0.hold.y, control.stickAreaRadius, 0, 2 * Math.PI)
       ctx.fill(); ctx.stroke()
-      ctx.beginPath();ctx.arc(control.touch0.hold.x, control.touch0.hold.y, control.stickSizeRadius, 0, 2 * Math.PI);
+      ctx.beginPath();ctx.arc(control.touch0.hold.x, control.touch0.hold.y, control.stickSizeRadius, 0, 2 * Math.PI)
       ctx.fill()
-      ctx.fillStyle = "#333333";
-      ctx.beginPath();ctx.arc(control.touch0.x, control.touch0.y, control.stickSizeRadius, 0, 2 * Math.PI);
+      ctx.fillStyle = "#333333"
+      ctx.beginPath();ctx.arc(control.touch0.x, control.touch0.y, control.stickSizeRadius, 0, 2 * Math.PI)
       ctx.fill(); ctx.stroke()
     }
     
+    // if (settings.debug){
+    //   ctx.fillStyle = "#FF000030"
+    //   ctx.fillRect(settings.screen.offset.x + (this.map.width - 1) * this.map.cellSize, settings.screen.offset.y, this.map.cellSize, this.map.cellSize)
+    // }
   }
 }
