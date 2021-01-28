@@ -19,6 +19,7 @@ function multiplication(vector, scale) {
   vector.y *= scale
 }
 
+
 let lastTimeLogic = Date.now()
 setInterval(function() {
   let timePass = Date.now() - lastTimeLogic
@@ -43,6 +44,7 @@ setInterval(function() {
   if (timePass < fps) {
       return
   }
+  //console.log(timePass)
 
   if(game.state == GameState.MENU) {
     menu.draw(canvasContext, canvas.width, canvas.height, timePass)

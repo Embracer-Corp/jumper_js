@@ -82,30 +82,9 @@ const game = {
     ctx.fillStyle = "#902000"
     ctx.fillRect(settings.screen.offset.x + this.player.realX - this.map.cellSize/2, settings.screen.offset.y + this.player.realY - this.map.cellSize, this.map.cellSize, this.map.cellSize)
     
-    if (control.mouse.hold != null) {
-      ctx.fillStyle = "#00000030"
-      ctx.beginPath();ctx.arc(control.mouse.hold.x, control.mouse.hold.y, control.stickAreaRadius, 0, 2 * Math.PI)
-      ctx.fill(); ctx.stroke()
-      ctx.beginPath();ctx.arc(control.mouse.hold.x, control.mouse.hold.y, control.stickSizeRadius, 0, 2 * Math.PI)
-      ctx.fill()
-      ctx.fillStyle = "#333333"
-      ctx.beginPath();ctx.arc(control.mouse.x, control.mouse.y, control.stickSizeRadius, 0, 2 * Math.PI)
-      ctx.fill(); ctx.stroke()
+    control.drawStick(ctx, ctxWidth, ctxHeight, timePass)
+    if (settings.debug) {
+      diagnostic.drawFpsInfo(ctx, ctxWidth, ctxHeight, timePass)
     }
-    if (control.touch0.hold != null) {
-      ctx.fillStyle = "#00000030"
-      ctx.beginPath();ctx.arc(control.touch0.hold.x, control.touch0.hold.y, control.stickAreaRadius, 0, 2 * Math.PI)
-      ctx.fill(); ctx.stroke()
-      ctx.beginPath();ctx.arc(control.touch0.hold.x, control.touch0.hold.y, control.stickSizeRadius, 0, 2 * Math.PI)
-      ctx.fill()
-      ctx.fillStyle = "#333333"
-      ctx.beginPath();ctx.arc(control.touch0.x, control.touch0.y, control.stickSizeRadius, 0, 2 * Math.PI)
-      ctx.fill(); ctx.stroke()
-    }
-    
-    // if (settings.debug){
-    //   ctx.fillStyle = "#FF000030"
-    //   ctx.fillRect(settings.screen.offset.x + (this.map.width - 1) * this.map.cellSize, settings.screen.offset.y, this.map.cellSize, this.map.cellSize)
-    // }
   }
 }

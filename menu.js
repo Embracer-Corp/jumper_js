@@ -59,35 +59,9 @@ const menu = {
     ctx.fillStyle = "#000"
     ctx.fillText(text, (ctxWidth - ctx.measureText(text).width)/2, (ctxHeight + 50)/2)
 
-    ctx.font = "12px Lucida Console"
     if (settings.debug) {
-      ctx.fillStyle = "#000"
-      let ori = ''
-      for (let so in ScreenOrientation) { if (ScreenOrientation[so] == settings.screen.orientation) { ori = so; break } }
-      ctx.fillText(`[${ori}]: ${settings.screen.width}x${settings.screen.height}`, settings.screen.offset.x + 5, settings.screen.offset.y + 15)
-
-      ctx.fillStyle = "#FF0000"
-      ctx.fillRect(0, 0, 10, 10)
-      ctx.fillRect(0, settings.screen.height-10, 10, 10)
-      ctx.fillRect(settings.screen.width-10, 0, 10, 10)
-      ctx.fillRect(settings.screen.width-10, settings.screen.height-10, 10, 10)
-
-      for(id in ongoingTouches)
-      {
-        ctx.fillStyle = ongoingTouches[id].color+"90"
-        ctx.strokeStyle = ongoingTouches[id].color+"E0"
-        ctx.beginPath(); canvasContext.arc(ongoingTouches[id].x[0], ongoingTouches[id].y[0], 4, 0, 2 * Math.PI, false)
-        ctx.fill()
-        ctx.lineWidth = 4
-        for (let i = 1; i < ongoingTouches[id].x.length; i++)
-        {
-          ctx.fillRect(ongoingTouches[id].x[i] - 3, ongoingTouches[id].y[i] - 3, 6, 6)
-          ctx.beginPath()
-          ctx.moveTo(ongoingTouches[id].x[i-1], ongoingTouches[id].y[i-1])
-          ctx.lineTo(ongoingTouches[id].x[i], ongoingTouches[id].y[i])
-          ctx.stroke()
-        }
-      }
+      diagnostic.drawScreenInfo(ctx, ctxWidth, ctxHeight, timePass)
+      diagnostic.drawFingerInfo(ctx, ctxWidth, ctxHeight, timePass)
     }
   }
 }

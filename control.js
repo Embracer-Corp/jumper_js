@@ -19,6 +19,30 @@ const control = {
       normalize(res, 1) 
     }
     return res
+  },
+  drawStick(ctx, ctxWidth, ctxHeight, timePass) {
+    ctx.strokeStyle = "#00000050"
+    if (control.mouse.hold != null) {
+      ctx.fillStyle = "#00000030"
+      ctx.beginPath();ctx.arc(control.mouse.hold.x, control.mouse.hold.y, control.stickAreaRadius, 0, 2 * Math.PI)
+      ctx.fill(); ctx.stroke()
+      ctx.beginPath();ctx.arc(control.mouse.hold.x, control.mouse.hold.y, control.stickSizeRadius, 0, 2 * Math.PI)
+      ctx.fill()
+      ctx.fillStyle = "#333333"
+      ctx.beginPath();ctx.arc(control.mouse.x, control.mouse.y, control.stickSizeRadius, 0, 2 * Math.PI)
+      ctx.fill(); ctx.stroke()
+    }
+    if (control.touch0.hold != null) {
+      ctx.strokeStyle = "#00000050"
+      ctx.fillStyle = "#00000030"
+      ctx.beginPath();ctx.arc(control.touch0.hold.x, control.touch0.hold.y, control.stickAreaRadius, 0, 2 * Math.PI)
+      ctx.fill(); ctx.stroke()
+      ctx.beginPath();ctx.arc(control.touch0.hold.x, control.touch0.hold.y, control.stickSizeRadius, 0, 2 * Math.PI)
+      ctx.fill()
+      ctx.fillStyle = "#333333"
+      ctx.beginPath();ctx.arc(control.touch0.x, control.touch0.y, control.stickSizeRadius, 0, 2 * Math.PI)
+      ctx.fill(); ctx.stroke()
+    }
   }
 }
 
@@ -39,15 +63,10 @@ function touchend(ev) {
 addEventListener('touchstart', function(ev) {
   if (document.fullscreenElement == null) { canvas.webkitRequestFullscreen() }
   else if (!settings.debug) { game.start() }
-  if (ev.targetTouches.length > 3) { settings.debug = !settings.debug }
 
-  let touches = ev.changedTouches
-  for (let i = 0; i < touches.length; i++) {
-    console.log("touchstart", touches[i].identifier)
-    if (touches[i].identifier > 4) continue
-    ongoingTouches[touches[i].identifier].x = [touches[i].pageX]
-    ongoingTouches[touches[i].identifier].y = [touches[i].pageY]
-  }
+  if (ev.targetTouches.length > 3) { settings.debug = !settings.debug }
+  if (settings.debug) { diagnostic.logTouch(ev) }
+
   // for (var i=0; i < ev.targetTouches.length; i++) {
   //   if (i > 0) break
   //   control['touch'+i].hold = {x: ev.changedTouches[i].pageX + canvas.offsetLeft, y: ev.changedTouches[i].pageY + canvas.offsetTop }
@@ -57,21 +76,16 @@ addEventListener('touchstart', function(ev) {
 }, false)
 
 addEventListener("touchmove", function(ev) {
+  if (settings.debug) { diagnostic.logTouch(ev) }
+
   control['touch0'].x = ev.changedTouches[0].pageX + canvas.offsetLeft
   control['touch0'].y = ev.changedTouches[0].pageY + canvas.offsetTop
 
-  let touches = ev.changedTouches
-  for (let i = 0; i < touches.length; i++) {
-    console.log("touchstart", touches[i].identifier)
-    if (touches[i].identifier > 4) continue
-    ongoingTouches[touches[i].identifier].x.push(touches[i].pageX)
-    ongoingTouches[touches[i].identifier].y.push(touches[i].pageY)
-  }
-
 }, false)
 
-addEventListener("touchend", touchend(ev), false)
-addEventListener("touchcancel", touchend(ev), false)
+addEventListener("touchend", touchend, false)
+addEventListener("touchcancel", touchend, false)
+
 
 // --- MOUSE ---
 function onMouseUpdate(e) {
@@ -89,6 +103,7 @@ addEventListener("mousedown", function(e) {
 addEventListener("mouseup", function() {
   control.mouse.hold = null
 })
+
 
 // --- KEYBOARD ---
 addEventListener("keydown", function(e) {
